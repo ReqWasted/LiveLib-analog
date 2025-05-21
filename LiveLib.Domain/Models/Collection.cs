@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 
 namespace LiveLib.Domain.Models
 {
-	public class Collection
-	{
-		public Guid Id { get; set; }
-		public string Title { get; set; } = string.Empty;
+    public class Collection
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
 
-		public List<User> Users { get; set; } = [];
+        public List<User> Users { get; set; } = [];
 
-		public List<Book> Books { get; set; } = [];
-		//public Guid UserId { get; set; }
-
-		//public User User { get; set; }
-
-	}
+        public List<Book> Books { get; set; } = [];
+    }
 }
