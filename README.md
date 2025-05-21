@@ -28,6 +28,10 @@
 - get /api/users/{id}/collections - получить коллекции пользователя
 - post /api/users/{id}/collections - добавить коллекцию (название коллекции)
 
+- get /api/books/recommidations - рекомендованые книги 
+- post /api/books/addToCollection - добавтиь книгу в коллекциию
+- delete /api/books/deleteFromCollection - удалить книгу в коллекциию
+ 
 # для админа
 - /api/books - посмотреть, добавить, все книги.
 - /api/books/{id} - удалить, изменить книгу.
