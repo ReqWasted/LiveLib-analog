@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace LiveLib.Domain.Models
 {
     public class Collection
-    {
+	{
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
 
