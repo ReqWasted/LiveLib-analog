@@ -22,6 +22,12 @@ services.AddJwtProvider(config);
 
 services.AddPasswordHasher(config);
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+	options.Configuration = config["Redis:Configuration"];
+	options.InstanceName = config["Redis:InstanceName"];
+});
+
 var JwtOptions = config.GetSection("JwtOptions");
 services.AddAuthentication(options =>
 {

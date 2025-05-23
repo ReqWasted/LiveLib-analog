@@ -72,7 +72,6 @@ namespace LiveLib.JwtProvider
 
 			await _tokenService.RevokeTokenAsync(storedRefreshToken.Id, cancellationToken);
 
-
 			var user = new User
 			{
 				Id = userId,
