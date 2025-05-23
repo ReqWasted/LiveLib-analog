@@ -16,8 +16,8 @@ namespace LiveLib.Application.Models.Reviews
 	{
 		public Guid Id { get; set; }
 
-		public UserDto User { get; set; }
-		public BookDto Book { get; set; }
+		public UserDto User { get; set; } = null!;
+		public BookDto Book { get; set; } = null!;
 		public double Rate { get; set; }
 		public bool IsRecommended { get; set; }
 

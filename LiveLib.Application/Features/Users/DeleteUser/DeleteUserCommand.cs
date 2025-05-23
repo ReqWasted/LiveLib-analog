@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace LiveLib.Application.Features.Users.DeleteUser
 {
-	public record DeleteUserCommand(Guid UserId) : IRequest<Result<int>>;
+	public record DeleteUserCommand(Guid UserId) : IRequest<Result>;
 }

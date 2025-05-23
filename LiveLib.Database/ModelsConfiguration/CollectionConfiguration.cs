@@ -19,9 +19,13 @@ namespace LiveLib.Database.ModelsConfiguration
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.HasMany(c => c.Users)
+            builder.HasOne(c => c.OwnerUser)
                 .WithMany(u => u.Collections)
-                .UsingEntity(j => j.ToTable("UserCollections"));
+                .HasForeignKey(c => c.OwnerUserId);
+
+            builder.HasMany(c => c.UsersSubscribers)
+                .WithMany(u => u.SubscribedCollections)
+                .UsingEntity(j => j.ToTable("CollectionSubscribers"));
 
             builder.HasMany(c => c.Books)
                 .WithMany(u => u.Collections)

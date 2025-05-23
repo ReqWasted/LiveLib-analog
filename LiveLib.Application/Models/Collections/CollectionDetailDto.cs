@@ -22,7 +22,7 @@ namespace LiveLib.Application.Models.Collections
 		public void Mapping(Profile profile)
 		{
 			profile.CreateMap<Collection, CollectionDetailDto>()
-				.ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.Users))
+				.ForMember(dest => dest.Users, opt => opt.MapFrom(src => src.UsersSubscribers))
 				.ForMember(dest => dest.Books, opt => opt.MapFrom(src => src.Books));
 		}
 	}

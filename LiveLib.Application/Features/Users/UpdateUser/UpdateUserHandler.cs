@@ -11,31 +11,38 @@ using System.Threading.Tasks;
 
 namespace LiveLib.Application.Features.Users.UpdateUser
 {
-	public class UpdateUserHandler : HandlerBase, IRequestHandler<UpdateUserCommand, Result<int>>
-	{
-		private readonly IPassowrdHasher _passowrdHasher;
+    public class UpdateUserHandler : HandlerBase, IRequestHandler<UpdateUserCommand, Result>
+    {
+        private readonly IPassowrdHasher _passowrdHasher;
 
-		public UpdateUserHandler(IMapper mapper, IDatabaseContext context, IPassowrdHasher passowrdHasher) : base(mapper, context)
-		{
-			_passowrdHasher = passowrdHasher;
-		}
+        public UpdateUserHandler(IMapper mapper, IDatabaseContext context, IPassowrdHasher passowrdHasher) : base(mapper, context)
+        {
+            _passowrdHasher = passowrdHasher;
+        }
 
-		public async Task<Result<int>> Handle(UpdateUserCommand reqwest, CancellationToken cancellationToken)
-		{
-			var updated = await _context.Users.Where(u => u.Id == reqwest.Id).ExecuteUpdateAsync(u =>
-			u.SetProperty(p => p.Name, reqwest.user.Username)
-			.SetProperty(p => p.Role, reqwest.user.Role)
-			.SetProperty(p => p.PasswordHash, _passowrdHasher.Hash(reqwest.user.Password)), cancellationToken);
+        public async Task<Result> Handle(UpdateUserCommand reqwest, CancellationToken cancellationToken)
+        {
+            //var updated = await _context.Users.Where(u => u.Id == reqwest.Id).ExecuteUpdateAsync(u =>
+            //u.SetProperty(p => p.Name, reqwest.user.Username)
+            //.SetProperty(p => p.Role, reqwest.user.Role)
+            //.SetProperty(p => p.PasswordHash, _passowrdHasher.Hash(reqwest.user.Password)), cancellationToken);
 
-			if (updated == 0)
-			{
-				return Result<int>.Failure("User not updated");
-			}
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == reqwest.Id, cancellationToken);
 
-			await _context.SaveChangesAsync(cancellationToken);
+            if (user == null)
+            {
+                return Result.Failure("User not found");
+            }
 
-			return Result<int>.Success(updated);
+            user.Name = reqwest.user.Username;
+            user.Role = reqwest.user.Role;
+            user.Email = reqwest.user.Email;
+            user.PasswordHash = _passowrdHasher.Hash(reqwest.user.Password);
 
-		}
-	}
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+
+        }
+    }
 }
