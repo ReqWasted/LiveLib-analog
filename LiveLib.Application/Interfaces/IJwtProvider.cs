@@ -24,6 +24,7 @@ namespace LiveLib.Application.Interfaces
         /// <param name="token">Access token</param>
         /// <returns>Информация о пользователе из токена</returns>
         System.Security.Claims.ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+        Task<Guid> GetUserIdByRefreshTokenAsync(string token, CancellationToken ct);
 
         /// <summary>
         /// Обновляет пару токенов на основе существующего refresh токена
@@ -40,9 +41,9 @@ namespace LiveLib.Application.Interfaces
         /// <summary>
         /// Отзывает все refresh токены пользователя
         /// </summary>
-        /// <param name="userId">Идентификатор пользователя</param>
         /// <param name="cancellationToken">Токен отмены</param>
         Task RevokeAllUserTokensAsync(Guid userId, CancellationToken cancellationToken = default);
-
+        Task RevokeUserTokenAsync(string token, CancellationToken cancellationToken = default);
+        Task<bool> ValidateRefreshToken(string refreshToken, CancellationToken ct);
     }
 }

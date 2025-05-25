@@ -1,11 +1,6 @@
 ﻿using LiveLib.Application.Interfaces;
 using LiveLib.Domain.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LiveLib.Database
 {
@@ -13,8 +8,6 @@ namespace LiveLib.Database
     {
         // Identity
         public DbSet<User> Users { get; set; }
-
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         // Application
         public DbSet<Author> Authors { get; set; }

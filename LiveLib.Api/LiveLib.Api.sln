@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveLib.PasswordHasher", ".
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveLib.JwtProvider", "..\LiveLib.JwtProvider\LiveLib.JwtProvider.csproj", "{F4DE311F-9E9A-4296-8013-8D6D7AC7F55B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveLib.CacheProvider", "..\LiveLib.CacheProvider\LiveLib.CacheProvider.csproj", "{C30DE7CF-286B-4785-8125-1F188E3545D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{F4DE311F-9E9A-4296-8013-8D6D7AC7F55B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4DE311F-9E9A-4296-8013-8D6D7AC7F55B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4DE311F-9E9A-4296-8013-8D6D7AC7F55B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C30DE7CF-286B-4785-8125-1F188E3545D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C30DE7CF-286B-4785-8125-1F188E3545D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C30DE7CF-286B-4785-8125-1F188E3545D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C30DE7CF-286B-4785-8125-1F188E3545D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

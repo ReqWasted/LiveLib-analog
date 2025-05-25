@@ -14,12 +14,9 @@ namespace LiveLib.Domain.Models
 
         public DateTime? RevokedAt { get; set; }
 
+        [JsonIgnore]
         public bool IsActive { get => RevokedAt == null; }
 
-        [JsonIgnore]
-        public virtual User User { get; set; } = null!;
         public Guid UserId { get; set; }
-
-
     }
 }

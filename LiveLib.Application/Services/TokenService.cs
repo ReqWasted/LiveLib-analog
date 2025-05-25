@@ -1,45 +1,51 @@
-﻿using LiveLib.Application.Interfaces;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
+using LiveLib.Application.Interfaces;
 using LiveLib.Domain.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace LiveLib.Application.Services
 {
     public class TokenService : ITokenService
     {
-        private readonly IDatabaseContext _context;
+        private readonly ICacheProvider _cache;
 
-        public TokenService(IDatabaseContext databaseContext)
+        public TokenService(ICacheProvider cache)
         {
-            _context = databaseContext;
+            _cache = cache;
         }
 
-        public async Task AddRefreshTokenAsync(RefreshToken token, CancellationToken ct)
+        public async Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
         {
-            await _context.RefreshTokens.AddAsync(token, ct);
+            var expiration = refreshToken.ExpiresAt - DateTime.UtcNow;
+            await _cache.ObjectSetAsync($"token:{refreshToken.Token}", refreshToken, expiration);
+            await _cache.SetAddAsync($"user:{refreshToken.UserId}:tokens", refreshToken.Token, expiration);
         }
 
-        public async Task<RefreshToken?> GetActiveTokenAsync(Guid userId, string userRefreshToken, CancellationToken ct)
+        public async Task<RefreshToken?> GetActiveTokenAsync(string userRefreshToken, CancellationToken ct)
         {
-            return await _context.RefreshTokens
-                .Where(t => t.UserId == userId && t.Token == userRefreshToken && t.RevokedAt == null)
-                .FirstOrDefaultAsync(ct);
+            var tokenString = await _cache.StringGetAsync($"token:{userRefreshToken}");
+            if (string.IsNullOrEmpty(tokenString)) return null;
+            return JsonSerializer.Deserialize<RefreshToken>(tokenString);
         }
 
-        public async Task RevokeTokenAsync(Guid tokenId, CancellationToken ct)
+        public async Task RevokeTokenAsync(RefreshToken refreshToken, CancellationToken ct)
         {
-            var token = await _context.RefreshTokens
-                .Where(t => t.Id == tokenId)
-                .FirstOrDefaultAsync(ct);
-
-            if (token is null) return;
-
-            token.RevokedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync(ct);
+            await _cache.RemoveAsync($"token:{refreshToken.Token}");
+            await _cache.SetRemoveAsync($"user:{refreshToken.UserId}:tokens", refreshToken.Token);
         }
 
-        public async Task<ICollection<RefreshToken>> GetActiveTokensByUserIdAsync(Guid userId, CancellationToken ct)
+        public async IAsyncEnumerable<RefreshToken> GetActiveTokensByUserIdAsync(Guid userId, [EnumeratorCancellation] CancellationToken ct)
         {
-            return await _context.RefreshTokens.Where(t => t.UserId == userId).ToListAsync(ct);
+            var tokens = await _cache.SetGetAsync($"user:{userId}:tokens");
+            foreach (var token in tokens)
+            {
+                ct.ThrowIfCancellationRequested();
+                var tokenString = await _cache.StringGetAsync($"token:{token}");
+                if (string.IsNullOrEmpty(tokenString)) continue;
+                var refreshToken = JsonSerializer.Deserialize<RefreshToken>(tokenString);
+                if (refreshToken is null) continue;
+                yield return refreshToken;
+            }
         }
     }
 }

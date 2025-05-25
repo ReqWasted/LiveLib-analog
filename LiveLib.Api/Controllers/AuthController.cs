@@ -1,135 +1,130 @@
-﻿using System.Security.Claims;
+﻿using LiveLib.Api.Common;
 using LiveLib.Api.Models;
 using LiveLib.Application.Features.Users.CreateUser;
+using LiveLib.Application.Features.Users.GetUserById;
 using LiveLib.Application.Features.Users.GetUserByUsername;
 using LiveLib.Application.Interfaces;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LiveLib.Api.Controllers
 {
-	[ApiController]
-	[Route("/Auth")]
-	public class AuthController : ControllerBase
-	{
-		private readonly IMediator _mediator;
-		private readonly IPassowrdHasher _passwordHasher;
-		private readonly IJwtProvider _jwtProvider;
+    [ApiController]
+    [Route("auth")]
+    public class AuthController : ControllerApiBase
+    {
+        private readonly IMediator _mediator;
+        private readonly IPassowrdHasher _passwordHasher;
+        private readonly IJwtProvider _jwtProvider;
 
-		public AuthController(IMediator mediator, IPassowrdHasher passwordHasher, IJwtProvider jwtProvider)
-		{
-			_mediator = mediator;
-			_passwordHasher = passwordHasher;
-			_jwtProvider = jwtProvider;
-		}
+        private CookieOptions _cookieOptions => new()
+        {
+            Path = "/auth",
+            Expires = DateTime.UtcNow.AddDays(15),
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = false,
+        };
 
-		[HttpPost("login")]
-		public async Task<IActionResult> Login([FromBody] UserLoginDto reqwest, CancellationToken ct)
-		{
-			var result = await _mediator.Send(new GetUserByUsernameQuery(reqwest.Username), ct);
+        public AuthController(IMediator mediator, IPassowrdHasher passwordHasher, IJwtProvider jwtProvider)
+        {
+            _mediator = mediator;
+            _passwordHasher = passwordHasher;
+            _jwtProvider = jwtProvider;
+        }
 
-			if (result.IsFailure)
-			{
-				return NotFound(result.Error);
-			}
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginDto reqwest, CancellationToken ct)
+        {
+            var refreshToken = Request.Cookies[_jwtProvider.CookieName];
 
-			var user = result.Value!;
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var isTokenValid = await _jwtProvider.ValidateRefreshToken(refreshToken, ct);
+                if (isTokenValid) return BadRequest("Токен ещё действует");
+            }
 
-			var isPasswordEqual = _passwordHasher.Verify(reqwest.Password, user.PasswordHash);
-			if (!isPasswordEqual)
-			{
-				return Unauthorized(reqwest.Username);
-			}
+            var result = await _mediator.Send(new GetUserByUsernameQuery(reqwest.Username), ct);
 
-			var tokens = await _jwtProvider.GenerateTokensAsync(user, ct);
+            if (result.IsFailure)
+            {
+                return ToActionResult(result);
+            }
 
-			Response.Cookies.Append(
-				_jwtProvider.CookieName,
-				tokens.refreshToken,
-				new CookieOptions
-				{
-					Path = "/auth/refresh",
-					Expires = DateTime.UtcNow.Add(_jwtProvider.RefreshTokenExpiresDays),
-					HttpOnly = true,
-					SameSite = SameSiteMode.Strict,
-					Secure = false,
-				});
+            var user = result.Value!;
+            var isPasswordEqual = _passwordHasher.Verify(reqwest.Password, user.PasswordHash);
+            if (!isPasswordEqual)
+            {
+                return Unauthorized(reqwest.Username);
+            }
 
-			return Ok(new { AccessToken = tokens.accessToken });
-		}
+            var tokens = await _jwtProvider.GenerateTokensAsync(user, ct);
+            Response.Cookies.Append(_jwtProvider.CookieName, tokens.refreshToken, _cookieOptions);
 
-		[HttpPost("register")]
-		public async Task<IActionResult> Register([FromBody] CreateUserCommand reqwest, CancellationToken ct)
-		{
-			var result = await _mediator.Send(new GetUserByUsernameQuery(reqwest.Name), ct);
+            return Ok(new { AccessToken = tokens.accessToken });
+        }
 
-			if (result.IsSuccess)
-			{
-				return Conflict(reqwest.Name);
-			}
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(CancellationToken ct)
+        {
+            var refreshToken = Request.Cookies[_jwtProvider.CookieName];
 
-			var newUser = await _mediator.Send(reqwest, ct);
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized("Отсутствует refresh токен");
+            }
 
-			if (newUser.IsFailure)
-			{
-				return Problem(newUser.Error);
-			}
+            await _jwtProvider.RevokeUserTokenAsync(refreshToken, ct);
+            Response.Cookies.Delete(_jwtProvider.CookieName, _cookieOptions);
 
-			return Ok();
-		}
+            return Ok();
+        }
 
-		[HttpPost("refresh")]
-		public async Task<IActionResult> RefreshTokens(CancellationToken ct)
-		{
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] CreateUserCommand reqwest, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new GetUserByUsernameQuery(reqwest.Name), ct);
 
-			var refreshToken = Request.Cookies[_jwtProvider.CookieName];
+            if (result.IsSuccess)
+            {
+                return Conflict(reqwest.Name);
+            }
 
-			if (string.IsNullOrEmpty(refreshToken))
-			{
-				return Unauthorized("Отсутствует refresh токен");
-			}
+            var newUser = await _mediator.Send(reqwest, ct);
 
-			var accessToken = HttpContext.Request.Headers["Authorization"].ToString()
-				.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase);
+            if (newUser.IsFailure)
+            {
+                return ToActionResult(newUser);
+            }
 
-			ClaimsPrincipal principal;
-			try
-			{
-				principal = _jwtProvider.GetPrincipalFromExpiredToken(accessToken);
-			}
-			catch (Exception ex)
-			{
-				return Unauthorized(ex.Message);
-			}
+            return Created();
+        }
 
-			var username = principal.FindFirst(ClaimTypes.Name)?.Value;
-			if (username == null)
-			{
-				return Unauthorized("Отсутсвует имя пользователя");
-			}
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshTokens(CancellationToken ct)
+        {
+            var refreshToken = Request.Cookies[_jwtProvider.CookieName];
 
-			var result = await _mediator.Send(new GetUserByUsernameQuery(username), ct);
-			if (result.IsFailure)
-			{
-				return NotFound(username);
-			}
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized("Отсутствует refresh токен");
+            }
 
-			var user = result.Value!;
+            var userId = await _jwtProvider.GetUserIdByRefreshTokenAsync(refreshToken, ct);
+            var result = await _mediator.Send(new GetUserByIdQuery(userId), ct);
 
-			var tokens = await _jwtProvider.GenerateTokensAsync(user, ct);
+            if (result.IsFailure)
+            {
+                return NotFound(refreshToken);
+            }
 
-			Response.Cookies.Delete(_jwtProvider.CookieName);
-			Response.Cookies.Append(_jwtProvider.CookieName, tokens.refreshToken, new()
-			{
-				Path = "/auth/refresh",
-				Expires = DateTime.UtcNow.Add(_jwtProvider.RefreshTokenExpiresDays),
-				HttpOnly = true,
-				SameSite = SameSiteMode.Strict,
-				Secure = false,
-			});
+            await _jwtProvider.RevokeUserTokenAsync(refreshToken, ct);
+            var tokens = await _jwtProvider.GenerateTokensAsync(result.Value!, ct);
 
-			return Ok(new { AccessToken = tokens.accessToken });
-		}
-	}
+            Response.Cookies.Delete(_jwtProvider.CookieName, _cookieOptions);
+            Response.Cookies.Append(_jwtProvider.CookieName, tokens.refreshToken, _cookieOptions);
+
+            return Ok(new { AccessToken = tokens.accessToken });
+        }
+    }
 }

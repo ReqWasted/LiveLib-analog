@@ -7,7 +7,7 @@ namespace LiveLib.Application.Interfaces
     {
         DbSet<User> Users { get; set; }
 
-        DbSet<RefreshToken> RefreshTokens { get; set; }
+        //DbSet<RefreshToken> RefreshTokens { get; set; }
 
         DbSet<Author> Authors { get; set; }
 

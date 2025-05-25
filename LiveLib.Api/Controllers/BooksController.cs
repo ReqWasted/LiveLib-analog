@@ -1,14 +1,19 @@
-﻿using LiveLib.Application.Features.Books.CreateBook;
+﻿using LiveLib.Api.Common;
+using LiveLib.Application.Features.Books.CreateBook;
+using LiveLib.Application.Features.Books.DeleteBook;
+using LiveLib.Application.Features.Books.GetBookById;
 using LiveLib.Application.Features.Books.GetBooks;
+using LiveLib.Application.Features.Books.UpdateBook;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LiveLib.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("/api/[controller]")]
-    public class BooksController : ControllerBase
+    public class BooksController : ControllerApiBase
     {
         private readonly IMediator _mediator;
 
@@ -18,18 +23,41 @@ namespace LiveLib.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllBooks(CancellationToken ct)
+        public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            return Ok(await _mediator.Send(new GetBooksQuery(), ct));
+            var books = await _mediator.Send(new GetBooksQuery(), ct);
+            return Ok(books);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDetail([FromRoute] Guid id, CancellationToken ct)
+        {
+            var get = await _mediator.Send(new GetBookByIdQuery(id), ct);
+            return ToActionResult(get);
         }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddBook([FromBody] CreateBookCommand reqwest, CancellationToken ct)
+        public async Task<IActionResult> Add([FromBody] CreateBookCommand reqwest, CancellationToken ct)
         {
-            return Ok(await _mediator.Send(new GetBooksQuery(), ct));
+            var create = await _mediator.Send(reqwest, ct);
+            return ToActionResult(create);
         }
 
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookDto updated, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new UpdateBookCommand(id, updated), ct);
+            return ToActionResult(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new DeleteBookCommand(id), ct);
+            return ToActionResult(result);
+        }
     }
 }

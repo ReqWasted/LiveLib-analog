@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
+using LiveLib.Application.Commom.Result;
 using LiveLib.Application.Interfaces;
 using LiveLib.Domain.Models;
-using LiveLib.Application.Commom.Result;
-using LiveLib.Application.Models.Users;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace LiveLib.Application.Features.Users.GetUserByUsername
 {
@@ -19,7 +18,7 @@ namespace LiveLib.Application.Features.Users.GetUserByUsername
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Name == request.Username, cancellationToken);
 
             if (user == null)
-                return Result<User>.Failure("User not found");
+                return Result<User>.NotFound("User not found");
 
             return Result.Success(user);
         }

@@ -1,23 +1,21 @@
-﻿using LiveLib.Api.Extentions;
-using LiveLib.Api.Models;
+﻿using LiveLib.Api.Common;
+using LiveLib.Api.Extentions;
 using LiveLib.Application.Features.Collections.GetCollectionsByUserId;
 using LiveLib.Application.Features.Reviews.GetReviewsByUserId;
 using LiveLib.Application.Features.Users.DeleteUser;
 using LiveLib.Application.Features.Users.GetUserById;
 using LiveLib.Application.Features.Users.GetUsers;
 using LiveLib.Application.Features.Users.UpdateUser;
-using LiveLib.Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace LiveLib.Api.Controllers
 {
     [ApiController]
     [Authorize]
     [Route("/api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : ControllerApiBase
     {
         private readonly IMediator _mediator;
         public UsersController(IMediator mediator)
@@ -29,7 +27,8 @@ namespace LiveLib.Api.Controllers
         public async Task<IActionResult> GetProfile(CancellationToken ct)
         {
             var result = await _mediator.Send(new GetUserByIdQuery(User.Id()));
-            return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+            return ToActionResult(result);
+            //return result.IsSuccess ? Ok(result.Value) : NotFound(result.ErrorMessage);
         }
 
         [HttpGet("profile/reviews")]
@@ -58,7 +57,8 @@ namespace LiveLib.Api.Controllers
         public async Task<IActionResult> GetUserById([FromRoute] Guid id, CancellationToken ct)
         {
             var result = await _mediator.Send(new GetUserByIdQuery(id), ct);
-            return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
+            return ToActionResult(result);
+            //return result.IsSuccess ? Ok(result.Value) : NotFound(result.ErrorMessage);
         }
 
         [HttpDelete("{id}")]
@@ -66,7 +66,8 @@ namespace LiveLib.Api.Controllers
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
         {
             var result = await _mediator.Send(new DeleteUserCommand(id), ct);
-            return result.IsSuccess ? Ok("User successfully deleted") : Problem(result.Error);
+            return ToActionResult(result);
+            //return result.IsSuccess ? Ok("User successfully deleted") : Problem(result.ErrorMessage);
         }
 
         [HttpPut("{id}")]
@@ -74,7 +75,8 @@ namespace LiveLib.Api.Controllers
         public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateDto updatedUser, CancellationToken ct)
         {
             var result = await _mediator.Send(new UpdateUserCommand(id, updatedUser), ct);
-            return result.IsSuccess ? Ok("User successfully updated") : Problem(result.Error);
+            return ToActionResult(result);
+            //return result.IsSuccess ? Ok("User successfully updated") : Problem(result.ErrorMessage);
         }
 
 

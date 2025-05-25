@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using LiveLib.Application.Commom.Result;
 using LiveLib.Application.Interfaces;
 using LiveLib.Domain.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace LiveLib.Application.Features.Users.CreateUser
 {
@@ -30,14 +24,11 @@ namespace LiveLib.Application.Features.Users.CreateUser
                 PasswordHash = _passwordHasher.Hash(request.Password),
                 Role = request.Role,
             };
-            var entity = _context.Users.Add(user);
-            await _context.SaveChangesAsync(cancellationToken);
 
-            if (!entity.IsKeySet)
-            {
-                return Result<User>.Failure("User not created");
-            }
-            return Result.Success(entity.Entity);
+            var entity = _context.Users.Add(user);
+            var result = await _context.SaveChangesAsync(cancellationToken);
+
+            return result == 0 ? Result<User>.Failure("User not created") : Result.Success(entity.Entity);
         }
     }
 }

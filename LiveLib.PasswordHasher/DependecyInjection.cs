@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using LiveLib.Application.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using LiveLib.Application.Interfaces;
 
 namespace LiveLib.PasswordHasher
 {

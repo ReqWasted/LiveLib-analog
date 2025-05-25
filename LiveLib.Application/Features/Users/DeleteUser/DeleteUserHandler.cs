@@ -1,14 +1,8 @@
 ﻿using AutoMapper;
 using LiveLib.Application.Commom.Result;
 using LiveLib.Application.Interfaces;
-using LiveLib.Domain.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LiveLib.Application.Features.Users.DeleteUser
 {

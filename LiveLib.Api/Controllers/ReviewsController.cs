@@ -1,17 +1,13 @@
-﻿using System.Security.Claims;
-using LiveLib.Api.Extentions;
-using LiveLib.Application.Features.Reviews.CreateReview;
-using LiveLib.Application.Features.Users.UpdateUser;
+﻿using LiveLib.Api.Common;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LiveLib.Api.Controllers
 {
     [ApiController]
-    [Authorize]
+    //[Authorize]
     [Route("/api/[controller]")]
-    public class ReviewsController : ControllerBase
+    public class ReviewsController : ControllerApiBase
     {
         private readonly IMediator _mediator;
         public ReviewsController(IMediator mediator)
@@ -19,13 +15,13 @@ namespace LiveLib.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateReviewCommand reqwest, CancellationToken ct)
-        {
-            reqwest.UserId = User.Id();
-            var result = await _mediator.Send(reqwest, ct);
-            return result.IsSuccess ? Ok("Review successfully created") : Problem(result.Error);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] CreateReviewCommand reqwest, CancellationToken ct)
+        //{
+        //    reqwest.UserId = User.Id();
+        //    var result = await _mediator.Send(reqwest, ct);
+        //    return result.IsSuccess ? Ok("Review successfully created") : Problem(result.ErrorMessage);
+        //}
 
         //[HttpGet("{id}")]
         //public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken ct)
