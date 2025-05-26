@@ -28,12 +28,12 @@ namespace LiveLib.Api.Controllers
             _mediator = mediator;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetAll(CancellationToken ct)
-        //{
-        //    var books = await _mediator.Send(new GetBookPublishersQuery(), ct);
-        //    return Ok(books);
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetAll(CancellationToken ct)
+        {
+            var collections = await _mediator.Send(new GetBookPublishersQuery(), ct);
+            return Ok(collections);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetail([FromRoute] Guid id, CancellationToken ct)
@@ -56,13 +56,13 @@ namespace LiveLib.Api.Controllers
             return ToActionResult(create);
         }
 
-        //[HttpPut("{id}")]
-        //[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookPublisherDto updated, CancellationToken ct)
-        //{
-        //    var result = await _mediator.Send(new UpdateBookPublisherCommand(id, updated), ct);
-        //    return ToActionResult(result);
-        //}
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookPublisherDto updated, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new UpdateBookPublisherCommand(id, updated), ct);
+            return ToActionResult(result);
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
