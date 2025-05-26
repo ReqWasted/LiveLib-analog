@@ -15,9 +15,5 @@ namespace LiveLib.Application.Models.Reviews
         public string Comment { get; set; } = string.Empty;
         public bool IsRecommended { get; set; }
 
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<Review, ReviewDto>();
-        }
     }
 }
