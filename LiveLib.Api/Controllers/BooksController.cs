@@ -4,6 +4,7 @@ using LiveLib.Application.Features.Books.DeleteBook;
 using LiveLib.Application.Features.Books.GetBookById;
 using LiveLib.Application.Features.Books.GetBooks;
 using LiveLib.Application.Features.Books.UpdateBook;
+using LiveLib.Application.Features.Books.UploadImage;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +45,16 @@ namespace LiveLib.Api.Controllers
             return ToActionResult(create);
         }
 
-        [HttpPut("{id}")]
+        [HttpPost("cover/{id}")]
+		[Authorize(Roles = "Admin")]
+		[Consumes("multipart/form-data")]
+		public async Task<IActionResult> UploadBookImage([FromRoute] Guid id, IFormFile image, CancellationToken ct)
+		{
+			var create = await _mediator.Send(new UploadImageCommand(id, image), ct);
+			return ToActionResult(create);
+		}
+
+		[HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookDto updated, CancellationToken ct)
         {
@@ -59,5 +69,6 @@ namespace LiveLib.Api.Controllers
             var result = await _mediator.Send(new DeleteBookCommand(id), ct);
             return ToActionResult(result);
         }
+        
     }
 }

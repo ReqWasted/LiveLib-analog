@@ -9,6 +9,7 @@
         public string Description { get; set; } = string.Empty;
         public double AverageRating { get; set; }
         public string Isbn { get; set; } = string.Empty;
+        public string CoverId { get; set; } = string.Empty;
         public List<Collection> Collections { get; set; } = [];
 
         public Guid GenreId { get; set; }
@@ -19,6 +20,7 @@
 
         public Guid BookPublisherId { get; set; }
         public BookPublisher BookPublisher { get; set; } = null!;
+
 
     }
 }

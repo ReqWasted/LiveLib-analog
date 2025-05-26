@@ -15,8 +15,9 @@ namespace LiveLib.Application.Models.Books
         public string Description { get; set; } = string.Empty;
         public double AverageRating { get; set; }
         public string Isbn { get; set; } = string.Empty;
+		public string CoverId { get; set; } = string.Empty;
 
-        public GenreDto Genre { get; set; } = null!;
+		public GenreDto Genre { get; set; } = null!;
 
         public AuthorDto Author { get; set; } = null!;
 

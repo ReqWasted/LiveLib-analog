@@ -22,6 +22,16 @@ namespace LiveLib.CacheProvider
 		{
 			await _redis.StringSetAsync(key, value, expiry);
 		}
+		public async Task BytesSetAsync(string key, byte[] value, TimeSpan? expiry = null)
+		{
+			await _redis.StringSetAsync(key, value, expiry);
+		}
+
+		public async Task<byte[]> BytesGetAsync(string key)
+		{
+			return await _redis.StringGetAsync(key);
+		}
+
 
 		public async Task RemoveAsync(string key)
 		{
@@ -57,5 +67,6 @@ namespace LiveLib.CacheProvider
 			if (value.IsNullOrEmpty) return default;
 			return JsonSerializer.Deserialize<T>(value);
 		}
+
 	}
 }

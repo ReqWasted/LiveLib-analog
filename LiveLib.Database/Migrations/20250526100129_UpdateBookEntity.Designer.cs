@@ -3,6 +3,7 @@ using System;
 using LiveLib.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LiveLib.Database.Migrations
 {
     [DbContext(typeof(PostgresDatabaseContext))]
-    partial class PostgresDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20250526100129_UpdateBookEntity")]
+    partial class UpdateBookEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

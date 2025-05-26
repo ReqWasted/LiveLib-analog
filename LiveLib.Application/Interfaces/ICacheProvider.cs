@@ -10,5 +10,7 @@
         Task<string?> StringGetAsync(string key);
         Task RemoveAsync(string key);
         Task StringSetAsync(string key, string value, TimeSpan? expiry = null);
-    }
+		Task BytesSetAsync(string key, byte[] value, TimeSpan? expiry = null);
+		Task<byte[]> BytesGetAsync(string key);
+	}
 }
