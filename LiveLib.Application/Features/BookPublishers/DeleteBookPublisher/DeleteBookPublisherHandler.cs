@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.BookPublishers;
 using MediatR;
@@ -15,17 +15,17 @@ namespace LiveLib.Application.Features.BookPublishers.DeleteBookPublisher
 
         public async Task<Result<BookPublisherDetailDto>> Handle(DeleteBookPublisherCommand request, CancellationToken cancellationToken)
         {
-            var book = await _context.BookPublishers.FirstOrDefaultAsync(b => b.Id == request.Id);
-            if (book == null)
+            var bookPublisher = await _context.BookPublishers.FirstOrDefaultAsync(b => b.Id == request.Id);
+            if (bookPublisher == null)
             {
-                return Result<BookPublisherDetailDto>.NotFound($"Book {request.Id} not found");
+                return Result<BookPublisherDetailDto>.NotFound($"BookPublisher {request.Id} not found");
             }
 
-            _context.BookPublishers.Remove(book);
+            _context.BookPublishers.Remove(bookPublisher);
             var removed = await _context.SaveChangesAsync(cancellationToken);
 
-            return removed == 0 ? Result<BookPublisherDetailDto>.NotFound($"Book {request.Id} not deleted")
-                : Result.Success(_mapper.Map<BookPublisherDetailDto>(book));
+            return removed == 0 ? Result<BookPublisherDetailDto>.ServerError($"BookPublisher {request.Id} not deleted")
+                : Result.Success(_mapper.Map<BookPublisherDetailDto>(bookPublisher));
         }
     }
 }

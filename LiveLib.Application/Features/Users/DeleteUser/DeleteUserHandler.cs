@@ -1,8 +1,7 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace LiveLib.Application.Features.Users.DeleteUser
 {
@@ -14,27 +13,16 @@ namespace LiveLib.Application.Features.Users.DeleteUser
 
         public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
         {
-            //var deleted = await _context.Users.Where(u => u.Id == request.UserId).ExecuteDeleteAsync(cancellationToken);
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+            var user = await _context.Users.FindAsync(request.UserId, cancellationToken);
 
             if (user == null)
             {
                 return Result.Failure("User not found");
             }
 
-            var entity = _context.Users.Remove(user);
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync(cancellationToken);
 
-            if (entity.Entity == null)
-            {
-                return Result.Failure("User not deleted");
-            }
-            await _context.SaveChangesAsync(cancellationToken);
-
-            //if (deleted == 0)
-            //{
-            //	return Result<int>.Failure("User not deleted");
-            //}
             return Result.Success();
         }
     }

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.BookPublishers;
 using MediatR;
@@ -18,14 +18,13 @@ namespace LiveLib.Application.Features.BookPublishers.UpdateBookPublisher
 
             if (bookPublisher == null)
             {
-                return Result<BookPublisherDetailDto>.NotFound($"Book {request.Id} not found");
+                return Result<BookPublisherDetailDto>.NotFound($"BookPublisher {request.Id} not found");
             }
 
             _mapper.Map(request.BookPublisher, bookPublisher);
-            var updated = await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            return updated == 0 ? Result<BookPublisherDetailDto>.ServerError($"Book {request.Id} not updated")
-                : Result.Success(_mapper.Map<BookPublisherDetailDto>(bookPublisher));
+            return Result.Success(_mapper.Map<BookPublisherDetailDto>(bookPublisher));
         }
     }
 }

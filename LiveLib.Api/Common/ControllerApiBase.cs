@@ -1,4 +1,4 @@
-﻿using LiveLib.Application.Commom.Result;
+﻿using LiveLib.Application.Commom.ResultWrapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LiveLib.Api.Common

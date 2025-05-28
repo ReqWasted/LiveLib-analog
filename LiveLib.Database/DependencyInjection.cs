@@ -20,8 +20,13 @@ namespace LiveLib.Database
 
             services.AddScoped<IDatabaseContext>(provider =>
             {
+
+
                 return provider.GetRequiredService<PostgresDatabaseContext>();
             });
+
+
+
 
             return services;
         }

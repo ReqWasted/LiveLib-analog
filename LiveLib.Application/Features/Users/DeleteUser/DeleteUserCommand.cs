@@ -1,4 +1,4 @@
-﻿using LiveLib.Application.Commom.Result;
+﻿using LiveLib.Application.Commom.ResultWrapper;
 using MediatR;
 
 namespace LiveLib.Application.Features.Users.DeleteUser

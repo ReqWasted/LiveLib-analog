@@ -17,30 +17,30 @@ namespace LiveLib.Application.Services
         public async Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken ct)
         {
             var expiration = refreshToken.ExpiresAt - DateTime.UtcNow;
-            await _cache.ObjectSetAsync($"token:{refreshToken.Token}", refreshToken, expiration);
-            await _cache.SetAddAsync($"user:{refreshToken.UserId}:tokens", refreshToken.Token, expiration);
+            await _cache.ObjectSetAsync($"token:{refreshToken.Token}", refreshToken, ct, expiration);
+            await _cache.SetAddAsync($"user:{refreshToken.UserId}:tokens", refreshToken.Token, ct, expiration);
         }
 
         public async Task<RefreshToken?> GetActiveTokenAsync(string userRefreshToken, CancellationToken ct)
         {
-            var tokenString = await _cache.StringGetAsync($"token:{userRefreshToken}");
+            var tokenString = await _cache.StringGetAsync($"token:{userRefreshToken}", ct);
             if (string.IsNullOrEmpty(tokenString)) return null;
             return JsonSerializer.Deserialize<RefreshToken>(tokenString);
         }
 
         public async Task RevokeTokenAsync(RefreshToken refreshToken, CancellationToken ct)
         {
-            await _cache.RemoveAsync($"token:{refreshToken.Token}");
-            await _cache.SetRemoveAsync($"user:{refreshToken.UserId}:tokens", refreshToken.Token);
+            await _cache.RemoveAsync($"token:{refreshToken.Token}", ct);
+            await _cache.SetRemoveAsync($"user:{refreshToken.UserId}:tokens", refreshToken.Token, ct);
         }
 
         public async IAsyncEnumerable<RefreshToken> GetActiveTokensByUserIdAsync(Guid userId, [EnumeratorCancellation] CancellationToken ct)
         {
-            var tokens = await _cache.SetGetAsync($"user:{userId}:tokens");
+            var tokens = await _cache.SetGetAsync($"user:{userId}:tokens", ct);
             foreach (var token in tokens)
             {
                 ct.ThrowIfCancellationRequested();
-                var tokenString = await _cache.StringGetAsync($"token:{token}");
+                var tokenString = await _cache.StringGetAsync($"token:{token}", ct);
                 if (string.IsNullOrEmpty(tokenString)) continue;
                 var refreshToken = JsonSerializer.Deserialize<RefreshToken>(tokenString);
                 if (refreshToken is null) continue;

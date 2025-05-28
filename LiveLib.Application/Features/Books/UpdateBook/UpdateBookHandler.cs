@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.Books;
 using MediatR;
@@ -21,18 +21,15 @@ namespace LiveLib.Application.Features.Books.UpdateBook
                 .Include(b => b.Genre)
                 .FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
 
-            var isNull = request.Book.PageCount == null;
-
             if (book == null)
             {
                 return Result<BookDetailDto>.NotFound($"Book {request.Id} not found");
             }
 
             _mapper.Map(request.Book, book);
-            var updated = await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            return updated == 0 ? Result<BookDetailDto>.ServerError($"Book {request.Id} not updated")
-                : Result.Success(_mapper.Map<BookDetailDto>(book));
+            return Result.Success(_mapper.Map<BookDetailDto>(book));
         }
     }
 }

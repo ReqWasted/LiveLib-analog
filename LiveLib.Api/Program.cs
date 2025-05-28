@@ -146,6 +146,20 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    try
+    {
+        var context = serviceProvider.GetRequiredService<PostgresDatabaseContext>();
+        DbInitializer.Initialize(context);
+    }
+    catch (Exception)
+    {
+        throw;
+    }
+}
+
 Console.WriteLine($"Is Development: {app.Environment.IsDevelopment()}");
 if (app.Environment.IsDevelopment())
 {

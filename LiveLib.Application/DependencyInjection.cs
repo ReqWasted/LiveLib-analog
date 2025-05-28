@@ -1,5 +1,9 @@
-﻿using LiveLib.Application.Interfaces;
+﻿using System.Reflection;
+using FluentValidation;
+using LiveLib.Application.Commom.Validation;
+using LiveLib.Application.Interfaces;
 using LiveLib.Application.Services;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,13 +17,9 @@ namespace LiveLib.Application
 
             services.AddAutoMapper(typeof(DependencyInjection).Assembly);
 
-            //services.AddTransient<IRunnerFabric, RunnerFabric>();
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
 
-            //services.AddScoped<IRunnerService, RunnerService>();
-
-            //services.AddScoped<ISimulationService, SimulationService>();
-
-            //services.AddScoped<IProbabilityService, ProbabilityService>();
+            services.AddValidatorsFromAssemblies([Assembly.GetExecutingAssembly()]);
 
             services.AddScoped<ITokenService, TokenService>();
 

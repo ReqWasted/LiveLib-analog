@@ -3,8 +3,10 @@ using LiveLib.Application.Features.Books.CreateBook;
 using LiveLib.Application.Features.Books.DeleteBook;
 using LiveLib.Application.Features.Books.GetBookById;
 using LiveLib.Application.Features.Books.GetBooks;
+using LiveLib.Application.Features.Books.GetCover;
 using LiveLib.Application.Features.Books.UpdateBook;
-using LiveLib.Application.Features.Books.UploadImage;
+using LiveLib.Application.Features.Books.UploadCover;
+using LiveLib.Application.Models.Books;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +26,7 @@ namespace LiveLib.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDto))]
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
             var books = await _mediator.Send(new GetBooksQuery(), ct);
@@ -31,6 +34,8 @@ namespace LiveLib.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BookDetailDto))]
+
         public async Task<IActionResult> GetDetail([FromRoute] Guid id, CancellationToken ct)
         {
             var get = await _mediator.Send(new GetBookByIdQuery(id), ct);
@@ -45,16 +50,32 @@ namespace LiveLib.Api.Controllers
             return ToActionResult(create);
         }
 
-        [HttpPost("cover/{id}")]
-		[Authorize(Roles = "Admin")]
-		[Consumes("multipart/form-data")]
-		public async Task<IActionResult> UploadBookImage([FromRoute] Guid id, IFormFile image, CancellationToken ct)
-		{
-			var create = await _mediator.Send(new UploadImageCommand(id, image), ct);
-			return ToActionResult(create);
-		}
+        [HttpGet("{bookId}/cover/{coverId}")]
+        [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> GetBookCover(Guid bookId, string coverId, CancellationToken ct)
+        {
+            var cover = await _mediator.Send(new GetCoverQuery(bookId, coverId), ct);
 
-		[HttpPut("{id}")]
+            if (cover.IsFailure)
+            {
+                return NotFound(cover.ErrorInfo!.Message);
+            }
+
+            return File(cover.Value!, "image/jpg");
+        }
+
+        [HttpPost("{bookId}/cover")]
+        [Authorize(Roles = "Admin")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadBookImage(Guid bookId, IFormFile image, CancellationToken ct)
+        {
+            var create = await _mediator.Send(new UploadCoverCommand(bookId, image), ct);
+            return ToActionResult(create);
+        }
+
+
+        [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateBookDto updated, CancellationToken ct)
         {
@@ -69,6 +90,6 @@ namespace LiveLib.Api.Controllers
             var result = await _mediator.Send(new DeleteBookCommand(id), ct);
             return ToActionResult(result);
         }
-        
+
     }
 }

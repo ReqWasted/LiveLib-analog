@@ -1,4 +1,4 @@
-﻿using LiveLib.Application.Commom.Result;
+﻿using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Models.Genres;
 using LiveLib.Domain.Models;
 using MediatR;

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.Genres;
 using MediatR;

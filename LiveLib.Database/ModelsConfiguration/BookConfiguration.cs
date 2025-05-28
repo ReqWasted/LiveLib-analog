@@ -27,7 +27,7 @@ namespace LiveLib.Database.ModelsConfiguration
                 .HasPrecision(3, 2);
 
             builder.Property(b => b.Isbn)
-                .HasMaxLength(13);
+                .HasMaxLength(17);
 
             builder.HasOne(b => b.Genre)
                 .WithMany(g => g.Books)

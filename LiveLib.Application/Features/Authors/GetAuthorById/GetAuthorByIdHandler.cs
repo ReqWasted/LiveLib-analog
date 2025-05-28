@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using AutoMapper.QueryableExtensions;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.Authors;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace LiveLib.Application.Features.Authors.GetAuthorById
 {
@@ -14,10 +16,13 @@ namespace LiveLib.Application.Features.Authors.GetAuthorById
 
         public async Task<Result<AuthorDetailDto>> Handle(GetAuthorByIdQuery request, CancellationToken cancellationToken)
         {
-            var author = await _context.Authors.FindAsync(request.Id, cancellationToken);
+            var author = await _context.Authors
+                .Where(a => a.Id == request.Id)
+                .ProjectTo<AuthorDetailDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            return author is null ? Result<AuthorDetailDto>.NotFound($"Genre {request.Id} not found") :
-                Result.Success(_mapper.Map<AuthorDetailDto>(author));
+            return author is null ? Result<AuthorDetailDto>.NotFound($"Author {request.Id} not found") :
+                Result.Success(author);
         }
     }
 }

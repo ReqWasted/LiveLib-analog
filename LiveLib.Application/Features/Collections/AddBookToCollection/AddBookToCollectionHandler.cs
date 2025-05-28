@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using LiveLib.Application.Commom.Result;
+﻿using AutoMapper;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.Books;
 using MediatR;
@@ -37,7 +32,7 @@ namespace LiveLib.Application.Features.Collections.AddBookToCollection
 
             if (collection.Books.Contains(book))
             {
-                return Result<BookDto>.NotFound($"Collection {request.CollectionId} already contain book {request.BookId}");
+                return Result<BookDto>.Conflict($"Collection {request.CollectionId} already contain book {request.BookId}");
             }
 
             collection.Books.Add(book);

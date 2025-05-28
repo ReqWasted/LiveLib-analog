@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using AutoMapper.QueryableExtensions;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.Books;
 using MediatR;
@@ -16,13 +17,12 @@ namespace LiveLib.Application.Features.Books.GetBookById
         public async Task<Result<BookDetailDto>> Handle(GetBookByIdQuery request, CancellationToken cancellationToken)
         {
             var book = await _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.BookPublisher)
-                .Include(b => b.Genre)
-                .FirstOrDefaultAsync(g => g.Id == request.Id, cancellationToken);
+                .Where(b => b.Id == request.Id)
+                .ProjectTo<BookDetailDto>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken);
 
             return book is null ? Result<BookDetailDto>.NotFound($"Book {request.Id} not found") :
-                Result.Success(_mapper.Map<BookDetailDto>(book));
+                Result.Success(book);
         }
     }
 }

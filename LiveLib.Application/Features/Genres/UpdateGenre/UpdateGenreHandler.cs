@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LiveLib.Application.Commom.Result;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Interfaces;
 using LiveLib.Application.Models.Genres;
 using MediatR;
@@ -22,10 +22,9 @@ namespace LiveLib.Application.Features.Genres.UpdateGenre
             }
 
             _mapper.Map(request.Genre, genre);
-            //_context.Genres.Entry(genre).CurrentValues.SetValues(request.Genre);
-            var updated = await _context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            return updated == 0 ? Result<GenreDetailDto>.ServerError($"Genre {request.Id} not updated") : Result.Success(_mapper.Map<GenreDetailDto>(genre));
+            return Result.Success(_mapper.Map<GenreDetailDto>(genre));
         }
     }
 }

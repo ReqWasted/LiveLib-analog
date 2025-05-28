@@ -113,8 +113,8 @@ namespace LiveLib.Database.Migrations
 
                     b.Property<string>("Isbn")
                         .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
+                        .HasMaxLength(17)
+                        .HasColumnType("character varying(17)");
 
                     b.Property<string>("Name")
                         .IsRequired()

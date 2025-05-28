@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using LiveLib.Application.Commom.Mapping;
+﻿using LiveLib.Application.Commom.Mapping;
 using LiveLib.Domain.Models;
 
 namespace LiveLib.Application.Features.BookPublishers.UpdateBookPublisher
@@ -8,11 +7,5 @@ namespace LiveLib.Application.Features.BookPublishers.UpdateBookPublisher
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
-
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<UpdateBookPublisherDto, BookPublisher>()
-                .ForAllMembers(opts => opts.Condition((src, dest, field) => field != null));
-        }
     }
 }

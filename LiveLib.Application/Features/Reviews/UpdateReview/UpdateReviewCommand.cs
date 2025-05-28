@@ -1,13 +1,8 @@
-﻿using LiveLib.Application.Commom.Result;
+﻿using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Application.Models.Reviews;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LiveLib.Application.Features.Reviews.UpdateReview
 {
-	public record UpdateReviewCommand(Guid Id, UpdateReviewDto Review) : IRequest<Result<ReviewDto>>;
+    public record UpdateReviewCommand(Guid Id, UpdateReviewDto Review) : IRequest<Result<ReviewDto>>;
 }

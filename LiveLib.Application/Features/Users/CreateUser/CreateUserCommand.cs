@@ -1,10 +1,11 @@
-﻿using LiveLib.Application.Commom.Result;
+﻿using LiveLib.Application.Commom.Mapping;
+using LiveLib.Application.Commom.ResultWrapper;
 using LiveLib.Domain.Models;
 using MediatR;
 
 namespace LiveLib.Application.Features.Users.CreateUser
 {
-    public class CreateUserCommand : IRequest<Result<User>>
+    public class CreateUserCommand : IRequest<Result<User>>, IMapWith<User>
     {
         public string Name { get; set; }
         public string Email { get; set; }

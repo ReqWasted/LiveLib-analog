@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using LiveLib.Application.Commom.Mapping;
+﻿using LiveLib.Application.Commom.Mapping;
 using LiveLib.Application.Models.Books;
 using LiveLib.Application.Models.Users;
 using LiveLib.Domain.Models;
