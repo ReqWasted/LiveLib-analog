@@ -11,7 +11,6 @@ namespace LiveLib.JwtProvider
 {
     public class JwtProvider : IJwtProvider
     {
-        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
         public string CookieName { get; private set; }
         public TimeSpan RefreshTokenExpiresDays { get; private set; }
@@ -23,7 +22,6 @@ namespace LiveLib.JwtProvider
 
         public JwtProvider(IConfiguration configuration, ITokenService tokenService)
         {
-            _configuration = configuration;
             _tokenService = tokenService;
             CookieName = configuration["JwtOptions:CookieName"] ?? "RefreshToken";
             RefreshTokenExpiresDays = TimeSpan.FromDays(int.Parse(configuration["JwtOptions:RefreshTokenExpiresDays"] ?? "15"));
@@ -128,7 +126,7 @@ namespace LiveLib.JwtProvider
             return token is not null;
         }
 
-        private ClaimsPrincipal ValidateJwtToken(string accessToken, TokenValidationParameters parameters)
+        private static ClaimsPrincipal ValidateJwtToken(string accessToken, TokenValidationParameters parameters)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var principal = tokenHandler.ValidateToken(accessToken, parameters, out SecurityToken securityToken);
@@ -175,7 +173,7 @@ namespace LiveLib.JwtProvider
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private string GenerateRefreshToken()
+        private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[64];
             using var rng = RandomNumberGenerator.Create();

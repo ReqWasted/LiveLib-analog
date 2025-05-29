@@ -1,11 +1,14 @@
 ﻿using LiveLib.Api.Common;
+using LiveLib.Api.Extentions;
 using LiveLib.Api.Models;
 using LiveLib.Application.Features.Users.CreateUser;
 using LiveLib.Application.Features.Users.GetUserById;
 using LiveLib.Application.Features.Users.GetUserByUsername;
 using LiveLib.Application.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace LiveLib.Api.Controllers
 {
@@ -16,6 +19,7 @@ namespace LiveLib.Api.Controllers
         private readonly IMediator _mediator;
         private readonly IPassowrdHasher _passwordHasher;
         private readonly IJwtProvider _jwtProvider;
+        private readonly ITokenService _tokenService;
 
         private CookieOptions _cookieOptions => new()
         {
@@ -26,11 +30,12 @@ namespace LiveLib.Api.Controllers
             Secure = false,
         };
 
-        public AuthController(IMediator mediator, IPassowrdHasher passwordHasher, IJwtProvider jwtProvider)
+        public AuthController(IMediator mediator, IPassowrdHasher passwordHasher, IJwtProvider jwtProvider, ITokenService tokenService)
         {
             _mediator = mediator;
             _passwordHasher = passwordHasher;
             _jwtProvider = jwtProvider;
+            _tokenService = tokenService;
         }
 
         [HttpPost("login")]
@@ -110,7 +115,18 @@ namespace LiveLib.Api.Controllers
                 return Unauthorized("Отсутствует refresh токен");
             }
 
-            var userId = await _jwtProvider.GetUserIdByRefreshTokenAsync(refreshToken, ct);
+            Response.Cookies.Delete(_jwtProvider.CookieName, _cookieOptions);
+
+            Guid userId;
+            try
+            {
+                userId = await _jwtProvider.GetUserIdByRefreshTokenAsync(refreshToken, ct);
+            }
+            catch (SecurityTokenException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+
             var result = await _mediator.Send(new GetUserByIdQuery(userId), ct);
 
             if (result.IsFailure)
@@ -121,10 +137,40 @@ namespace LiveLib.Api.Controllers
             await _jwtProvider.RevokeUserTokenAsync(refreshToken, ct);
             var tokens = await _jwtProvider.GenerateTokensAsync(result.Value!, ct);
 
-            Response.Cookies.Delete(_jwtProvider.CookieName, _cookieOptions);
             Response.Cookies.Append(_jwtProvider.CookieName, tokens.refreshToken, _cookieOptions);
 
             return Ok(new { AccessToken = tokens.accessToken });
+        }
+
+        [Authorize]
+        [HttpPost("logoutAll")]
+        public async Task<IActionResult> LogoutFromAll(CancellationToken ct)
+        {
+            await _jwtProvider.RevokeAllUserTokensAsync(User.Id(), ct);
+            Response.Cookies.Delete(_jwtProvider.CookieName, _cookieOptions);
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("revokeSession/{sessionId}")]
+        public async Task<IActionResult> RevokeActiveSession(Guid sessionId, CancellationToken ct)
+        {
+            var token = await _tokenService.GetActiveTokenByIdAsync(sessionId, ct);
+
+            if (token == null)
+            {
+                return BadRequest(sessionId);
+            }
+
+            await _tokenService.RevokeTokenAsync(token, ct);
+            return Ok();
+        }
+
+        [Authorize]
+        [HttpGet("activeSessions")]
+        public async Task<IActionResult> GetActiveSessions(CancellationToken ct)
+        {
+            return Ok(_tokenService.GetActiveTokensByUserIdAsync(User.Id(), ct));
         }
     }
 }
